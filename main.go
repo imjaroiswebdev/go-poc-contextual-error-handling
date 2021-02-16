@@ -26,11 +26,11 @@ type ResponseError struct {
 	Err        error       `json:"-"`
 }
 
-func (r *ResponseError) Error() string {
+func (r ResponseError) Error() string {
 	return fmt.Sprintf("%s%s: %s", r.Op, r.Code, r.Err.Error())
 }
 
-func (r *ResponseError) Unwrap() error {
+func (r ResponseError) Unwrap() error {
 	return r.Err
 }
 
@@ -54,7 +54,11 @@ var dummyRes = ResponseError{
 	Err:        ErrVerbSvcInternal,
 }
 
-func justPrint(payload ResponseError) {
+func justPrint(p interface{}) {
+	payload, ok := p.(ResponseError)
+	if !ok {
+		panic("error data couldn't be parsed")
+	}
 	res := ResponseEnvelope{
 		HTTPStatus: payload.httpStatus,
 		Data:       nil,
@@ -104,6 +108,22 @@ var verbSvcRegisteredErrors = []ResponseError{
 	},
 }
 
+func MapErrorToResponseError(errorRegistry ResponseErrorsRegistry, err error, defaultOp string) error {
+	for _, r := range errorRegistry {
+		wrappedErr := errors.Unwrap(r)
+		if errors.Is(err, wrappedErr) {
+			return r
+		}
+	}
+	return ResponseError{
+		httpStatus: http.StatusInternalServerError,
+		Op:         defaultOp,
+		Code:       "errInternal",
+		Message:    "internal error",
+		Extra:      nil,
+	}
+}
+
 func main() {
 	fmt.Println("Error info handling POC")
 	fmt.Println("Refference Response...")
@@ -140,21 +160,4 @@ func main() {
 	fmt.Printf("Error from Business Logic⤵️\n\t%v\n", e)
 	errorInfo = MapErrorToResponseError(verbSvcRegisteredErrors, e, "verbSvc")
 	justPrint(errorInfo)
-}
-
-func MapErrorToResponseError(errorRegistry ResponseErrorsRegistry, err error, defaultOp string) ResponseError {
-	for _, r := range errorRegistry {
-		wrappedErr := errors.Unwrap(&r)
-		if errors.Is(err, wrappedErr) {
-			return r
-		}
-	}
-	return ResponseError{
-		httpStatus: http.StatusInternalServerError,
-		Op:         defaultOp,
-		Code:       "errInternal",
-		Message:    "internal error",
-		Extra:      nil,
-		Err:        ErrVerbSvcInternal,
-	}
 }
