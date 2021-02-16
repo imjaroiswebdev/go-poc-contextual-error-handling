@@ -112,7 +112,14 @@ func MapErrorToResponseError(errorRegistry ResponseErrorsRegistry, err error, de
 	for _, r := range errorRegistry {
 		wrappedErr := errors.Unwrap(r)
 		if errors.Is(err, wrappedErr) {
-			return r
+			return ResponseError{
+				httpStatus: r.httpStatus,
+				Op:         r.Op,
+				Code:       r.Code,
+				Message:    r.Message,
+				Extra:      nil,
+				Err:        err,
+			}
 		}
 	}
 	return ResponseError{
