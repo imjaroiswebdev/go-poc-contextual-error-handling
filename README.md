@@ -85,4 +85,13 @@ Printing Response json...
   "extra": null
 }
 ```
+## Test Coverage Result
 
+```bash
+main.go:29:   Error                   100.0%
+main.go:33:   Unwrap                  100.0%
+main.go:57:   justPrint               0.0%
+main.go:111:  MapErrorToResponseError 100.0%
+main.go:135:  main                    0.0%
+total:        (statements)            15.9%
+```
