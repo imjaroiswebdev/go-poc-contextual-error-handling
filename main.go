@@ -27,7 +27,7 @@ type ResponseError struct {
 }
 
 func (r ResponseError) Error() string {
-	return fmt.Sprintf("%s%s: %s", r.Op, r.Code, r.Err.Error())
+	return fmt.Sprintf("%s: %s", r.Op, r.Err.Error())
 }
 
 func (r ResponseError) Unwrap() error {
@@ -128,6 +128,7 @@ func MapErrorToResponseError(errorRegistry ResponseErrorsRegistry, err error, de
 		Code:       "errInternal",
 		Message:    "internal error",
 		Extra:      nil,
+		Err:        err,
 	}
 }
 
