@@ -65,7 +65,7 @@ func TestErrorMapper(t *testing.T) {
 
 		contextualErrorMessage := fmt.Sprintf("%s: %s", responseError.Op, test.inputError.Error())
 		if responseError.Error() != contextualErrorMessage {
-			t.Errorf("For %q was expected an exact match for contextual error message: %v, but got: %v", test.label, test.inputError, responseError)
+			t.Errorf("For %q was expected an exact match for contextual error message: %v, but got: %v", test.label, test.inputError.Error(), responseError.Error())
 		}
 
 		if responseError.httpStatus != test.expectedHTTPStatus {
